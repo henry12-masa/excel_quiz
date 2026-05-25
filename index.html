@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel関数クイズ</title>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8398161859137802"
+ crossorigin="anonymous"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:linear-gradient(135deg,#064e3b,#0f172a);
+  color:#fff;
+}
+header{
+  padding:28px 16px;
+  text-align:center;
+  background:linear-gradient(135deg,#10b981,#059669);
+}
+header h1{margin:0;font-size:30px}
+header p{margin:8px 0 0;color:#ecfdf5}
+.ad{
+  max-width:900px;
+  margin:16px auto;
+  padding:10px;
+  background:#ffffff10;
+  border-radius:14px;
+}
+.container{
+  max-width:900px;
+  margin:0 auto;
+  padding:16px;
+}
+.card{
+  background:#ffffff;
+  color:#111827;
+  border-radius:22px;
+  padding:24px;
+  box-shadow:0 20px 40px #0005;
+}
+.info{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+  font-weight:bold;
+}
+.badge{
+  background:#d1fae5;
+  color:#065f46;
+  padding:8px 12px;
+  border-radius:999px;
+}
+.question{
+  font-size:22px;
+  font-weight:800;
+  margin:18px 0;
+  line-height:1.6;
+}
+.choices{
+  display:grid;
+  gap:12px;
+}
+button.choice{
+  border:2px solid #d1d5db;
+  background:#f9fafb;
+  padding:16px;
+  border-radius:16px;
+  font-size:16px;
+  cursor:pointer;
+  text-align:left;
+}
+button.choice:hover{
+  background:#ecfdf5;
+  border-color:#10b981;
+}
+button.correct{
+  background:#dcfce7;
+  border-color:#22c55e;
+}
+button.wrong{
+  background:#fee2e2;
+  border-color:#ef4444;
+}
+.explain{
+  margin-top:18px;
+  padding:16px;
+  background:#f3f4f6;
+  border-radius:14px;
+  display:none;
+  line-height:1.7;
+}
+.result{
+  text-align:center;
+  display:none;
+}
+.result h2{font-size:30px}
+.restart{
+  margin-top:20px;
+  padding:14px 24px;
+  border:none;
+  border-radius:999px;
+  background:#10b981;
+  color:white;
+  font-size:17px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.progress{
+  height:12px;
+  background:#e5e7eb;
+  border-radius:999px;
+  overflow:hidden;
+  margin:18px 0;
+}
+.bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#10b981,#22c55e);
+}
+.footer{
+  text-align:center;
+  color:#d1fae5;
+  padding:30px 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Excel関数クイズ</h1>
+  <p>SUM・IF・VLOOKUP・XLOOKUP・COUNTIFなどを楽しく学ぼう</p>
+</header>
+
+<div class="ad">
+  <!-- UIゲーム -->
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-8398161859137802"
+       data-ad-slot="6325875393"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>
+       (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</div>
+
+<div class="container">
+  <div class="card" id="quizCard">
+    <div class="info">
+      <div class="badge" id="count">1 / 30</div>
+      <div class="badge" id="score">正解 0</div>
+    </div>
+
+    <div class="progress">
+      <div class="bar" id="bar"></div>
+    </div>
+
+    <div class="question" id="question"></div>
+    <div class="choices" id="choices"></div>
+    <div class="explain" id="explain"></div>
+  </div>
+
+  <div class="card result" id="result">
+    <h2>結果発表</h2>
+    <p id="resultText"></p>
+    <button class="restart" onclick="restartQuiz()">もう一度挑戦する</button>
+  </div>
+</div>
+
+<div class="footer">
+  Excel関数の基礎力チェックに使える学習クイズ
+</div>
+
+<script>
+const allQuestions = [
+  {q:"合計を求める関数はどれ？", c:["SUM","AVERAGE","COUNT","MAX"], a:0, e:"SUM関数は指定した範囲の数値を合計します。例：=SUM(A1:A10)"},
+  {q:"平均を求める関数はどれ？", c:["COUNT","AVERAGE","MIN","LEFT"], a:1, e:"AVERAGE関数は数値の平均を求めます。"},
+  {q:"数値が入っているセルの個数を数える関数は？", c:["COUNTA","COUNT","COUNTIF","SUMIF"], a:1, e:"COUNTは数値セルの個数を数えます。文字も含めるならCOUNTAです。"},
+  {q:"空白ではないセルを数える関数は？", c:["COUNT","COUNTA","COUNTBLANK","LEN"], a:1, e:"COUNTAは文字・数値を問わず、空白でないセルを数えます。"},
+  {q:"空白セルを数える関数は？", c:["COUNTBLANK","COUNTIF","ISBLANK","EMPTY"], a:0, e:"COUNTBLANKは空白セルの数を数えます。"},
+  {q:"最大値を求める関数は？", c:["MIN","MAX","LARGE","TOP"], a:1, e:"MAX関数は範囲内の最大値を返します。"},
+  {q:"最小値を求める関数は？", c:["SMALL","LOW","MIN","BOTTOM"], a:2, e:"MIN関数は範囲内の最小値を返します。"},
+  {q:"条件によって結果を分ける関数は？", c:["IF","AND","OR","SWITCH"], a:0, e:"IF関数は条件が真か偽かで結果を分けます。"},
+  {q:"複数条件すべてが正しいか判定する関数は？", c:["OR","AND","IFERROR","NOT"], a:1, e:"AND関数はすべての条件がTRUEのときTRUEを返します。"},
+  {q:"複数条件のどれか1つが正しいか判定する関数は？", c:["AND","OR","IFS","MATCH"], a:1, e:"OR関数は1つでも条件がTRUEならTRUEを返します。"},
+
+  {q:"条件に合うセルの個数を数える関数は？", c:["SUMIF","COUNTIF","AVERAGEIF","MATCH"], a:1, e:"COUNTIFは条件に合うセル数を数えます。例：=COUNTIF(A:A,\"東京\")"},
+  {q:"条件に合う数値だけを合計する関数は？", c:["COUNTIF","SUMIF","IF","SUM"], a:1, e:"SUMIFは条件に一致したデータだけを合計します。"},
+  {q:"条件に合う数値の平均を求める関数は？", c:["AVERAGE","AVERAGEIF","COUNTIF","SUMIF"], a:1, e:"AVERAGEIFは条件に合うデータの平均を求めます。"},
+  {q:"複数条件で個数を数える関数は？", c:["COUNTIFS","COUNTIF","SUMIFS","IFS"], a:0, e:"COUNTIFSは複数条件に一致するセルを数えます。"},
+  {q:"複数条件で合計する関数は？", c:["SUMIF","SUMIFS","COUNTIFS","AVERAGEIFS"], a:1, e:"SUMIFSは複数条件に一致した数値を合計します。"},
+  {q:"複数条件で平均を求める関数は？", c:["AVERAGEIFS","AVERAGEIF","SUMIFS","COUNTIFS"], a:0, e:"AVERAGEIFSは複数条件に一致した値の平均を求めます。"},
+  {q:"エラー時に別の値を表示する関数は？", c:["IFNA","IFERROR","ERROR","ISERROR"], a:1, e:"IFERRORは計算結果がエラーなら指定した値を返します。"},
+  {q:"#N/Aエラーだけを処理したいときに使う関数は？", c:["IFERROR","IFNA","ISNA","NA"], a:1, e:"IFNAは#N/Aエラーの場合だけ代替値を返します。"},
+  {q:"文字数を数える関数は？", c:["TEXT","LEN","COUNT","VALUE"], a:1, e:"LEN関数は文字列の文字数を返します。"},
+  {q:"左から指定文字数を取り出す関数は？", c:["LEFT","RIGHT","MID","FIND"], a:0, e:"LEFTは左端から指定した文字数を取り出します。"},
+
+  {q:"右から指定文字数を取り出す関数は？", c:["LEFT","RIGHT","MID","SEARCH"], a:1, e:"RIGHTは右端から指定した文字数を取り出します。"},
+  {q:"文字列の途中から取り出す関数は？", c:["MID","LEFT","RIGHT","LEN"], a:0, e:"MIDは開始位置と文字数を指定して文字を取り出します。"},
+  {q:"文字列を結合する関数は？", c:["JOIN","CONCAT","MERGE","LINK"], a:1, e:"CONCATは複数の文字列を結合できます。"},
+  {q:"区切り文字を指定して文字列を結合する関数は？", c:["CONCAT","TEXTJOIN","JOINIF","MERGE"], a:1, e:"TEXTJOINは区切り文字を指定して文字列を結合できます。"},
+  {q:"文字列内の文字位置を探す関数は？", c:["FIND","LEN","LEFT","TRIM"], a:0, e:"FINDは指定した文字が何文字目にあるかを返します。"},
+  {q:"余分なスペースを削除する関数は？", c:["CLEAN","TRIM","SUBSTITUTE","VALUE"], a:1, e:"TRIMは文字列の前後や余分なスペースを整理します。"},
+  {q:"文字列を置換する関数は？", c:["REPLACE","CHANGE","SWITCH","TEXT"], a:0, e:"REPLACEは指定した位置の文字を置き換えます。"},
+  {q:"特定の文字を別の文字に置換する関数は？", c:["SUBSTITUTE","REPLACE","CHANGE","TEXT"], a:0, e:"SUBSTITUTEは指定した文字列を別の文字列に置き換えます。"},
+  {q:"数値を文字列の表示形式に変える関数は？", c:["VALUE","TEXT","FORMAT","STRING"], a:1, e:"TEXT関数は数値や日付を指定した表示形式の文字列に変換します。"},
+  {q:"文字列を数値に変換する関数は？", c:["TEXT","VALUE","NUM","INT"], a:1, e:"VALUE関数は数値として扱える文字列を数値に変換します。"},
+
+  {q:"今日の日付を表示する関数は？", c:["NOW","TODAY","DATE","DAY"], a:1, e:"TODAY関数は現在の日付を返します。"},
+  {q:"現在の日付と時刻を表示する関数は？", c:["TODAY","NOW","TIME","DATE"], a:1, e:"NOW関数は現在の日付と時刻を返します。"},
+  {q:"年を取り出す関数は？", c:["YEAR","MONTH","DAY","DATE"], a:0, e:"YEAR関数は日付から年を取り出します。"},
+  {q:"月を取り出す関数は？", c:["DAY","MONTH","YEAR","DATE"], a:1, e:"MONTH関数は日付から月を取り出します。"},
+  {q:"日を取り出す関数は？", c:["DATE","DAY","MONTH","YEAR"], a:1, e:"DAY関数は日付から日を取り出します。"},
+  {q:"日付を作る関数は？", c:["DATE","DAY","TODAY","NOW"], a:0, e:"DATE関数は年・月・日を指定して日付を作ります。"},
+  {q:"時刻を作る関数は？", c:["TIME","NOW","HOUR","MINUTE"], a:0, e:"TIME関数は時・分・秒から時刻を作ります。"},
+  {q:"曜日番号を返す関数は？", c:["WEEKDAY","DAY","DATE","MONTH"], a:0, e:"WEEKDAYは日付に対応する曜日番号を返します。"},
+  {q:"月末日を求める関数は？", c:["EOMONTH","MONTHEND","ENDDAY","LASTDAY"], a:0, e:"EOMONTHは指定月の月末日を返します。"},
+  {q:"営業日後の日付を求める関数は？", c:["WORKDAY","NETWORKDAYS","DATE","DAYS"], a:0, e:"WORKDAYは土日などを除いた営業日後の日付を求めます。"},
+
+  {q:"2つの日付の差を日数で求める関数は？", c:["DAYS","DATE","DAY","DATEDIF"], a:0, e:"DAYS関数は2つの日付の間の日数を返します。"},
+  {q:"営業日数を数える関数は？", c:["WORKDAY","NETWORKDAYS","DAYS","WEEKDAY"], a:1, e:"NETWORKDAYSは開始日から終了日までの営業日数を返します。"},
+  {q:"小数点以下を切り捨てる関数は？", c:["ROUND","ROUNDDOWN","ROUNDUP","INT"], a:1, e:"ROUNDDOWNは指定した桁数で切り捨てます。"},
+  {q:"小数点以下を切り上げる関数は？", c:["ROUNDUP","ROUNDDOWN","ROUND","INT"], a:0, e:"ROUNDUPは指定した桁数で切り上げます。"},
+  {q:"四捨五入する関数は？", c:["ROUND","INT","TRUNC","CEILING"], a:0, e:"ROUNDは指定した桁数で四捨五入します。"},
+  {q:"整数部分だけを返す関数は？", c:["INT","ROUND","MOD","ABS"], a:0, e:"INTは小数点以下を切り捨てて整数を返します。"},
+  {q:"余りを求める関数は？", c:["MOD","INT","ROUND","ABS"], a:0, e:"MODは割り算の余りを返します。"},
+  {q:"絶対値を求める関数は？", c:["ABS","INT","MOD","SIGN"], a:0, e:"ABSは数値の絶対値を返します。"},
+  {q:"順位を求める関数は？", c:["RANK.EQ","SORT","ORDER","LARGE"], a:0, e:"RANK.EQは数値の順位を返します。"},
+  {q:"指定順位の大きい値を返す関数は？", c:["MAX","LARGE","RANK","SORT"], a:1, e:"LARGEは範囲内で何番目に大きい値かを返します。"},
+
+  {q:"指定順位の小さい値を返す関数は？", c:["MIN","SMALL","RANK","SORT"], a:1, e:"SMALLは範囲内で何番目に小さい値かを返します。"},
+  {q:"縦方向に検索する古典的な関数は？", c:["HLOOKUP","VLOOKUP","MATCH","INDEX"], a:1, e:"VLOOKUPは表の左端列を検索して、指定列の値を返します。"},
+  {q:"横方向に検索する関数は？", c:["VLOOKUP","HLOOKUP","XLOOKUP","MATCH"], a:1, e:"HLOOKUPは横方向の表で検索します。"},
+  {q:"新しい検索関数で、左右どちらの検索にも強いものは？", c:["VLOOKUP","XLOOKUP","COUNTIF","IF"], a:1, e:"XLOOKUPはVLOOKUPより柔軟で、左方向検索や見つからない場合の指定もできます。"},
+  {q:"検索値が範囲内の何番目にあるか返す関数は？", c:["MATCH","INDEX","LOOKUP","FIND"], a:0, e:"MATCHは検索値の位置番号を返します。"},
+  {q:"指定した行番号・列番号の値を返す関数は？", c:["MATCH","INDEX","VLOOKUP","CHOOSE"], a:1, e:"INDEXは指定した位置にある値を返します。"},
+  {q:"INDEXとよく組み合わせる検索位置取得関数は？", c:["MATCH","SUM","IF","TEXT"], a:0, e:"INDEXとMATCHを組み合わせると柔軟な検索ができます。"},
+  {q:"一覧を並べ替える関数は？", c:["SORT","FILTER","UNIQUE","ORDER"], a:0, e:"SORT関数はデータを昇順・降順に並べ替えます。"},
+  {q:"条件に合う行だけ抽出する関数は？", c:["FILTER","SORT","UNIQUE","SELECT"], a:0, e:"FILTER関数は条件に一致するデータだけを抽出します。"},
+  {q:"重複を除いた一覧を作る関数は？", c:["UNIQUE","FILTER","SORT","DISTINCT"], a:0, e:"UNIQUE関数は重複を除いた値を返します。"},
+
+  {q:"複数の条件を順番に判定する関数は？", c:["IF","IFS","AND","OR"], a:1, e:"IFS関数は複数条件を順番に判定できます。"},
+  {q:"値に応じて複数の結果を切り替える関数は？", c:["SWITCH","IFERROR","CHOOSE","MATCH"], a:0, e:"SWITCHは値に応じて返す結果を切り替えられます。"},
+  {q:"番号に応じて候補から値を選ぶ関数は？", c:["CHOOSE","SWITCH","INDEX","MATCH"], a:0, e:"CHOOSEは番号に対応した値を返します。"},
+  {q:"TRUE/FALSEを反転する関数は？", c:["NOT","OR","AND","IF"], a:0, e:"NOTはTRUEをFALSEに、FALSEをTRUEに反転します。"},
+  {q:"セルが空白か判定する関数は？", c:["ISBLANK","COUNTBLANK","EMPTY","BLANK"], a:0, e:"ISBLANKはセルが空白ならTRUEを返します。"},
+  {q:"セルが数値か判定する関数は？", c:["ISNUMBER","ISTEXT","ISFORMULA","ISERROR"], a:0, e:"ISNUMBERは値が数値ならTRUEを返します。"},
+  {q:"セルが文字列か判定する関数は？", c:["ISTEXT","ISNUMBER","ISBLANK","ISERROR"], a:0, e:"ISTEXTは値が文字列ならTRUEを返します。"},
+  {q:"数式が入っているか判定する関数は？", c:["ISFORMULA","FORMULA","ISTEXT","CELL"], a:0, e:"ISFORMULAはセルに数式がある場合TRUEを返します。"},
+  {q:"セル情報を取得する関数は？", c:["CELL","INFO","TYPE","ADDRESS"], a:0, e:"CELL関数はセルの書式や位置などの情報を返します。"},
+  {q:"セル参照のアドレス文字列を作る関数は？", c:["ADDRESS","CELL","ROW","COLUMN"], a:0, e:"ADDRESSは行番号・列番号からセル番地を作ります。"},
+
+  {q:"行番号を返す関数は？", c:["ROW","COLUMN","ADDRESS","CELL"], a:0, e:"ROWはセルの行番号を返します。"},
+  {q:"列番号を返す関数は？", c:["COLUMN","ROW","ADDRESS","CELL"], a:0, e:"COLUMNはセルの列番号を返します。"},
+  {q:"範囲の行数を返す関数は？", c:["ROWS","ROW","COUNT","COUNTA"], a:0, e:"ROWSは指定範囲の行数を返します。"},
+  {q:"範囲の列数を返す関数は？", c:["COLUMNS","COLUMN","COUNT","COUNTA"], a:0, e:"COLUMNSは指定範囲の列数を返します。"},
+  {q:"ランダムな0以上1未満の数を返す関数は？", c:["RAND","RANDBETWEEN","RANDOM","NUM"], a:0, e:"RANDは0以上1未満のランダムな小数を返します。"},
+  {q:"指定範囲のランダムな整数を返す関数は？", c:["RAND","RANDBETWEEN","INT","MOD"], a:1, e:"RANDBETWEENは指定した最小値から最大値までの整数をランダムに返します。"},
+  {q:"数値の符号を返す関数は？", c:["SIGN","ABS","INT","MOD"], a:0, e:"SIGNは正なら1、0なら0、負なら-1を返します。"},
+  {q:"平方根を求める関数は？", c:["SQRT","POWER","ROOT","SQUARE"], a:0, e:"SQRTは平方根を返します。"},
+  {q:"べき乗を求める関数は？", c:["POWER","SQRT","EXP","LOG"], a:0, e:"POWERは数値のべき乗を求めます。"},
+  {q:"数値の対数を求める関数は？", c:["LOG","EXP","POWER","SQRT"], a:0, e:"LOGは指定した底の対数を返します。"},
+
+  {q:"指定した文字列を繰り返す関数は？", c:["REPT","REPEAT","TEXTJOIN","CONCAT"], a:0, e:"REPTは文字列を指定回数繰り返します。"},
+  {q:"大文字に変換する関数は？", c:["UPPER","LOWER","PROPER","TEXT"], a:0, e:"UPPERは英字を大文字にします。"},
+  {q:"小文字に変換する関数は？", c:["LOWER","UPPER","PROPER","TEXT"], a:0, e:"LOWERは英字を小文字にします。"},
+  {q:"英単語の先頭を大文字にする関数は？", c:["PROPER","UPPER","LOWER","CAPITAL"], a:0, e:"PROPERは各単語の先頭を大文字にします。"},
+  {q:"印刷できない文字を削除する関数は？", c:["CLEAN","TRIM","SUBSTITUTE","REMOVE"], a:0, e:"CLEANは改行などの印刷できない文字を削除します。"},
+  {q:"文字コードを返す関数は？", c:["CODE","CHAR","UNICODE","TEXT"], a:0, e:"CODEは文字に対応する文字コードを返します。"},
+  {q:"文字コードから文字を返す関数は？", c:["CHAR","CODE","TEXT","VALUE"], a:0, e:"CHARは文字コードから文字を返します。"},
+  {q:"指定した値がリスト内にあるか探すときによく使う組み合わせは？", c:["ISNUMBER+MATCH","SUM+LEFT","TEXT+COUNT","RAND+IF"], a:0, e:"MATCHで位置を探し、ISNUMBERで存在判定する使い方がよくあります。"},
+  {q:"エラーかどうか判定する関数は？", c:["ISERROR","IFERROR","ERROR","IFNA"], a:0, e:"ISERRORは値がエラーならTRUEを返します。"},
+  {q:"参照先の値を間接的に指定する関数は？", c:["INDIRECT","ADDRESS","INDEX","MATCH"], a:0, e:"INDIRECTは文字列で指定したセル参照を実際の参照として扱います。"},
+
+  {q:"複数範囲を縦に結合する関数は？", c:["VSTACK","HSTACK","TEXTJOIN","CONCAT"], a:0, e:"VSTACKは複数の配列や範囲を縦方向に結合します。"},
+  {q:"複数範囲を横に結合する関数は？", c:["HSTACK","VSTACK","CONCAT","TEXTJOIN"], a:0, e:"HSTACKは複数の配列や範囲を横方向に結合します。"},
+  {q:"配列から指定した行・列を除外する関数は？", c:["DROP","TAKE","FILTER","SORT"], a:0, e:"DROPは配列の先頭または末尾から指定行・列を除外します。"},
+  {q:"配列から指定した行・列だけ取り出す関数は？", c:["TAKE","DROP","FILTER","SORT"], a:0, e:"TAKEは配列の先頭または末尾から指定行・列を取り出します。"},
+  {q:"指定した列だけ選ぶ関数は？", c:["CHOOSECOLS","CHOOSEROWS","FILTER","INDEX"], a:0, e:"CHOOSECOLSは配列から指定列を取り出します。"},
+  {q:"指定した行だけ選ぶ関数は？", c:["CHOOSEROWS","CHOOSECOLS","FILTER","INDEX"], a:0, e:"CHOOSEROWSは配列から指定行を取り出します。"},
+  {q:"データを行方向に折り返す関数は？", c:["WRAPROWS","WRAPCOLS","VSTACK","HSTACK"], a:0, e:"WRAPROWSは1列のデータなどを指定列数で行方向に折り返します。"},
+  {q:"データを列方向に折り返す関数は？", c:["WRAPCOLS","WRAPROWS","VSTACK","HSTACK"], a:0, e:"WRAPCOLSはデータを指定行数で列方向に折り返します。"},
+  {q:"範囲を1列または1行にする関数は？", c:["TOCOL","TEXTJOIN","CONCAT","FILTER"], a:0, e:"TOCOLは配列を1列に変換します。TOROWなら1行です。"},
+  {q:"配列を1行に変換する関数は？", c:["TOROW","TOCOL","HSTACK","VSTACK"], a:0, e:"TOROWは範囲や配列を1行に変換します。"},
+
+  {q:"数式内で変数のように名前を定義できる関数は？", c:["LET","LAMBDA","VAR","NAME"], a:0, e:"LETは数式内で名前を定義して、式を読みやすくできます。"},
+  {q:"自作関数のような処理を作れる関数は？", c:["LAMBDA","LET","IF","SWITCH"], a:0, e:"LAMBDAは独自の計算ロジックを関数のように定義できます。"},
+  {q:"各要素に同じ処理を適用する関数は？", c:["MAP","FILTER","SORT","UNIQUE"], a:0, e:"MAPは配列の各値にLAMBDA処理を適用できます。"},
+  {q:"配列を1つの値に集計していく関数は？", c:["REDUCE","MAP","SCAN","FILTER"], a:0, e:"REDUCEは配列を累積処理して最終結果を返します。"},
+  {q:"途中経過も含めて累積結果を返す関数は？", c:["SCAN","REDUCE","MAP","SORT"], a:0, e:"SCANは累積処理の途中結果も配列で返します。"},
+  {q:"行ごとにLAMBDAを適用する関数は？", c:["BYROW","BYCOL","MAP","FILTER"], a:0, e:"BYROWは各行ごとに処理を適用します。"},
+  {q:"列ごとにLAMBDAを適用する関数は？", c:["BYCOL","BYROW","MAP","FILTER"], a:0, e:"BYCOLは各列ごとに処理を適用します。"},
+  {q:"指定条件でデータを抽出し、見つからない場合の値も指定できる関数は？", c:["FILTER","COUNTIF","SUMIF","MATCH"], a:0, e:"FILTERは条件に合うデータを抽出し、空の場合の表示も指定できます。"},
+  {q:"XLOOKUPで検索値が見つからない場合の表示を指定できる？", c:["できる","できない","VLOOKUPだけできる","COUNTIFが必要"], a:0, e:"XLOOKUPには見つからない場合に返す値を指定する引数があります。"},
+  {q:"VLOOKUPで左側の列を検索結果として返すのは基本的に得意？", c:["得意","苦手","必ずできる","COUNTIFでできる"], a:1, e:"VLOOKUPは基本的に検索列より右側の値を返します。左方向検索ならXLOOKUPやINDEX/MATCHが便利です。"},
+
+  {q:"IF関数の基本構造として正しいものは？", c:["=IF(条件,真の場合,偽の場合)","=IF(真の場合,偽の場合,条件)","=IF(範囲,条件,合計)","=IF(文字数,開始位置,条件)"], a:0, e:"IFは条件、TRUEの場合、FALSEの場合の順番です。"},
+  {q:"COUNTIFの基本構造として正しいものは？", c:["=COUNTIF(範囲,条件)","=COUNTIF(条件,範囲)","=COUNTIF(合計範囲,条件範囲)","=COUNTIF(文字列,文字数)"], a:0, e:"COUNTIFは範囲と条件を指定します。"},
+  {q:"SUMIFの基本構造として正しいものは？", c:["=SUMIF(条件範囲,条件,合計範囲)","=SUMIF(合計範囲,条件,条件範囲)","=SUMIF(条件,範囲)","=SUMIF(文字列,条件)"], a:0, e:"SUMIFは条件範囲、条件、合計範囲の順番です。"},
+  {q:"VLOOKUPの第4引数で完全一致を指定する値は？", c:["FALSE","TRUE","1","AUTO"], a:0, e:"VLOOKUPの第4引数にFALSEを指定すると完全一致検索になります。"},
+  {q:"VLOOKUPの第4引数TRUEは何検索？", c:["近似一致","完全一致","エラー無視","左検索"], a:0, e:"TRUEは近似一致検索です。完全一致ならFALSEです。"},
+  {q:"COUNTIFSとSUMIFSの違いは？", c:["COUNTIFSは個数、SUMIFSは合計","COUNTIFSは合計、SUMIFSは個数","同じ意味","どちらも平均"], a:0, e:"COUNTIFSは件数、SUMIFSは数値の合計を求めます。"},
+  {q:"IFERRORを使う主な目的は？", c:["エラー時の表示を整える","平均を求める","文字数を数える","日付を作る"], a:0, e:"IFERRORはエラーを見やすい表示に変えるときに便利です。"},
+  {q:"FILTER関数で抽出条件に使いやすい記号は？", c:["=","@","#","$だけ"], a:0, e:"条件式では A:A=\"東京\" のように比較演算子を使います。"},
+  {q:"絶対参照で使う記号は？", c:["$","#","@","&"], a:0, e:"$A$1のように$を使うと参照を固定できます。"},
+  {q:"文字列結合に使う演算子は？", c:["&","+","*","%"], a:0, e:"Excelでは & を使って文字列を結合できます。"},
+
+  {q:"「A1が80以上なら合格、それ以外は不合格」に向く関数は？", c:["IF","SUM","LEN","DATE"], a:0, e:"条件分岐なのでIF関数が向いています。"},
+  {q:"「東京都の売上だけ合計」に向く関数は？", c:["SUMIF","COUNTIF","AVERAGE","LEN"], a:0, e:"条件付き合計なのでSUMIFが向いています。"},
+  {q:"「商品名がりんごの行数を数える」に向く関数は？", c:["COUNTIF","SUMIF","IF","MAX"], a:0, e:"条件に合う件数を数えるのでCOUNTIFです。"},
+  {q:"「部署ごとの平均点」を出すのに向く関数は？", c:["AVERAGEIF","SUMIF","COUNTIF","LEFT"], a:0, e:"条件に合うデータの平均なのでAVERAGEIFです。"},
+  {q:"「会員IDから名前を取り出す」に向く関数は？", c:["XLOOKUP","SUM","ROUND","TODAY"], a:0, e:"ID検索にはXLOOKUPやVLOOKUPが向いています。"},
+  {q:"「重複した名前を1つにまとめる」に向く関数は？", c:["UNIQUE","FILTER","SORT","COUNT"], a:0, e:"重複削除にはUNIQUE関数が便利です。"},
+  {q:"「売上が高い順に並べる」に向く関数は？", c:["SORT","FILTER","UNIQUE","TEXT"], a:0, e:"並べ替えにはSORT関数が使えます。"},
+  {q:"「80点以上の人だけ表示」に向く関数は？", c:["FILTER","SORT","UNIQUE","SUM"], a:0, e:"条件抽出なのでFILTER関数が向いています。"},
+  {q:"「日付から月だけ取り出す」に向く関数は？", c:["MONTH","YEAR","DAY","DATE"], a:0, e:"月だけを取り出すならMONTH関数です。"},
+  {q:"「文字列の前後の余計な空白を消す」に向く関数は？", c:["TRIM","CLEAN","LEFT","RIGHT"], a:0, e:"余計なスペース削除にはTRIMが便利です。"}
+];
+
+let questions = [];
+let current = 0;
+let score = 0;
+const total = 30;
+let locked = false;
+
+function shuffle(array){
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function startQuiz(){
+  questions = shuffle([...allQuestions]).slice(0,total);
+  current = 0;
+  score = 0;
+  locked = false;
+  document.getElementById("quizCard").style.display = "block";
+  document.getElementById("result").style.display = "none";
+  showQuestion();
+}
+
+function showQuestion(){
+  locked = false;
+  const q = questions[current];
+  document.getElementById("count").textContent = `${current + 1} / ${total}`;
+  document.getElementById("score").textContent = `正解 ${score}`;
+  document.getElementById("bar").style.width = `${(current / total) * 100}%`;
+  document.getElementById("question").textContent = q.q;
+  document.getElementById("explain").style.display = "none";
+  document.getElementById("explain").textContent = "";
+
+  const choices = document.getElementById("choices");
+  choices.innerHTML = "";
+
+  q.c.forEach((choice, index) => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.textContent = choice;
+    btn.onclick = () => answer(index, btn);
+    choices.appendChild(btn);
+  });
+}
+
+function answer(index){
+  if(locked) return;
+  locked = true;
+
+  const q = questions[current];
+  const buttons = document.querySelectorAll(".choice");
+
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if(i === q.a) btn.classList.add("correct");
+    if(i === index && i !== q.a) btn.classList.add("wrong");
+  });
+
+  if(index === q.a) score++;
+
+  const explain = document.getElementById("explain");
+  explain.style.display = "block";
+  explain.textContent = q.e;
+
+  setTimeout(() => {
+    current++;
+    if(current < total){
+      showQuestion();
+    }else{
+      showResult();
+    }
+  }, 1300);
+}
+
+function showResult(){
+  document.getElementById("quizCard").style.display = "none";
+  document.getElementById("result").style.display = "block";
+  document.getElementById("bar").style.width = "100%";
+
+  let rank = "";
+  if(score >= 27) rank = "Excel関数マスター級！かなり実務で使えるレベルです。";
+  else if(score >= 22) rank = "かなり優秀！基本関数はしっかり理解できています。";
+  else if(score >= 15) rank = "中級レベル。IF・COUNTIF・VLOOKUP系を復習すると伸びます。";
+  else rank = "基礎から復習がおすすめ。SUM、IF、COUNTIFから覚えると一気に伸びます。";
+
+  document.getElementById("resultText").innerHTML =
+    `あなたのスコアは <strong>${score} / ${total}</strong> です。<br><br>${rank}`;
+}
+
+function restartQuiz(){
+  startQuiz();
+}
+
+startQuiz();
+</script>
+
+</body>
+</html>
